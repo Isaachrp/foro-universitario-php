@@ -1,0 +1,13 @@
+# Archivos sensibles
+.env
+app/config/database.php
+
+# Subidas de usuarios
+uploads/
+
+# Logs
+*.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
