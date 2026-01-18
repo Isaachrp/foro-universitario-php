@@ -1,5 +1,5 @@
-<h2><?= htmlspecialchars($postData['titulo']) ?></h2>
-<p><?= htmlspecialchars($postData['contenido']) ?></p>
+<h2><?= e($postData['titulo']) ?></h2>
+<p><?= e($postData['contenido']) ?></p>
 
 <?php if ($postData['archivo']): ?>
     <p>Archivo: <a href="/uploads/<?= $postData['archivo'] ?>" target="_blank"><?= $postData['archivo'] ?></a></p>
@@ -8,7 +8,7 @@
 <hr>
 <h3>Comentarios</h3>
 <?php foreach ($comments as $c): ?>
-    <p><strong><?= htmlspecialchars($c['nombre']) ?>:</strong> <?= htmlspecialchars($c['contenido']) ?></p>
+    <p><strong><?= e($c['nombre']) ?>:</strong> <?= e($c['contenido']) ?></p>
 <?php endforeach; ?>
 
 <hr>
