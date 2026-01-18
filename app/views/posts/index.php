@@ -3,8 +3,8 @@
 <a href="/posts/create">Crear nueva publicación</a><br><br>
 
 <?php foreach ($posts as $p): ?>
-    <h3><a href="/posts/show?id=<?= $p['id'] ?>"><?= htmlspecialchars($p['titulo']) ?></a></h3>
-    <p><?= htmlspecialchars($p['contenido']) ?></p>
-    <small>Por <?= htmlspecialchars($p['nombre']) ?> | <?= $p['created_at'] ?></small>
+    <h3><a href="/posts/show?id=<?= $p['id'] ?>"><?= e($p['titulo']) ?></a></h3>
+    <p><?= e($p['contenido']) ?></p>
+    <small>Por <?= e($p['nombre']) ?> | <?= $p['created_at'] ?></small>
     <hr>
 <?php endforeach; ?>
