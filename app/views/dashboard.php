@@ -12,3 +12,9 @@ if (!isset($_SESSION['user_id'])) {
 <a href="/posts/create">Crear Publicación</a> | 
 <a href="/logout">Cerrar Sesión</a>
 
+<!-- ------------------------pruebas --------------------->
+<pre>
+SESSION USER ID: <?= var_dump($_SESSION['user_id']) ?>
+SESSION USER ROLE: <?= var_dump($_SESSION['user_role']) ?>
+</pre>
+<!-- ------------------------------------------------- -->

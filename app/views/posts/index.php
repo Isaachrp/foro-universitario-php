@@ -8,3 +8,10 @@
     <small>Por <?= e($p['nombre']) ?> | <?= $p['created_at'] ?></small>
     <hr>
 <?php endforeach; ?>
+<!-- ------------------------pruebas --------------------->
+<pre>
+SESSION USER ID: <?= var_dump($_SESSION['user_id']) ?>
+SESSION USER ROLE: <?= var_dump($_SESSION['user_role']) ?>
+</pre>
+<!-- ------------------------------------------------- -->
+

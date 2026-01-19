@@ -99,4 +99,30 @@ class PostController
 
         require_once __DIR__ . '/../views/posts/show.php';
     }
+
+    public function delete($id)
+    {
+        if (!Auth::check()) {
+            header("Location: /login");
+            exit;
+        }
+
+        $post = (new Post())->getById($id);
+
+        if (!$post) {
+            http_response_code(404);
+            exit("Post no encontrado");
+        }
+
+        // Regla CLAVE
+        if ($post['user_id'] !== Auth::id() && !Auth::isAdmin()) {
+            http_response_code(403);
+            exit("No tienes permisos para borrar este post");
+        }
+
+        (new Post())->delete($id);
+
+        header("Location: /posts");
+        exit;
+    }
 }
