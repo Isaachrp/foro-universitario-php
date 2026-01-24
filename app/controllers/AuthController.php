@@ -38,9 +38,6 @@ class AuthController
             $user = (new User())->getByEmail($email);
 
             if ($user && password_verify($password, $user['password'])) {
-
-                session_regenerate_id(true); //  evita session fixation
-                
                 // Credenciales correctas
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['nombre'];

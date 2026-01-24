@@ -3,7 +3,7 @@ require_once __DIR__ . '/../models/Comment.php';
 
 class CommentController {
     public function create() {
-        //session_start();
+        session_start();
         if (!isset($_SESSION['user_id'])) {
             header("Location: /login");
             exit;

@@ -2,72 +2,26 @@
 require_once __DIR__ . '/../models/Post.php';
 require_once __DIR__ . '/../models/Comment.php';
 
-class PostController
-{
+class PostController {
 
-    public function create()
-    {
+    public function create() {
+        session_start();
         if (!isset($_SESSION['user_id'])) {
             header("Location: /login");
             exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-            $titulo    = trim($_POST['titulo']);
-            if (strlen($titulo) < 5 || strlen($titulo) > 255) {
-                die("Título inválido");
-            }
+            $titulo = trim($_POST['titulo']);
             $contenido = trim($_POST['contenido']);
             $categoria = $_POST['categoria'];
-            $archivo   = null;
+            $archivo = null;
 
-            // === PASO 3: SUBIDA DE ARCHIVOS SEGURA ===
-            if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
-
-                // MIME permitidos
-                $allowedTypes = [
-                    'application/pdf',
-                    'application/msword',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                ];
-
-                // Extensiones permitidas
-                $allowedExtensions = ['pdf', 'doc', 'docx'];
-
-                // Validar MIME real
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                $mime  = finfo_file($finfo, $_FILES['archivo']['tmp_name']);
-                finfo_close($finfo);
-
-                if (!in_array($mime, $allowedTypes)) {
-                    die("Tipo de archivo no permitido");
-                }
-
-                // Validar extensión
-                $extension = strtolower(pathinfo($_FILES['archivo']['name'], PATHINFO_EXTENSION));
-
-                if (!in_array($extension, $allowedExtensions)) {
-                    die("Extensión de archivo no permitida");
-                }
-
-                // Limitar tamaño (2 MB)
-                $maxSize = 2 * 1024 * 1024;
-
-                if ($_FILES['archivo']['size'] > $maxSize) {
-                    die("Archivo demasiado grande");
-                }
-
-                // Generar nombre seguro
-                $nombreArchivo = bin2hex(random_bytes(16)) . '.' . $extension;
-
-                // Ruta destino
+            // Manejo de archivo
+            if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === 0) {
+                $nombreArchivo = time() . '_' . $_FILES['archivo']['name'];
                 $destino = __DIR__ . '/../../uploads/' . $nombreArchivo;
-
-                if (!move_uploaded_file($_FILES['archivo']['tmp_name'], $destino)) {
-                    die("Error al subir el archivo");
-                }
-
+                move_uploaded_file($_FILES['archivo']['tmp_name'], $destino);
                 $archivo = $nombreArchivo;
             }
 
@@ -81,16 +35,13 @@ class PostController
         require_once __DIR__ . '/../views/posts/create.php';
     }
 
-
-    public function index()
-    {
+    public function index() {
         $post = new Post();
         $posts = $post->getAll();
         require_once __DIR__ . '/../views/posts/index.php';
     }
 
-    public function show($id)
-    {
+    public function show($id) {
         $post = new Post();
         $postData = $post->getById($id);
 
@@ -98,31 +49,5 @@ class PostController
         $comments = $comment->getByPostId($id);
 
         require_once __DIR__ . '/../views/posts/show.php';
-    }
-
-    public function delete($id)
-    {
-        if (!Auth::check()) {
-            header("Location: /login");
-            exit;
-        }
-
-        $post = (new Post())->getById($id);
-
-        if (!$post) {
-            http_response_code(404);
-            exit("Post no encontrado");
-        }
-
-        // Regla CLAVE
-        if ($post['user_id'] !== Auth::id() && !Auth::isAdmin()) {
-            http_response_code(403);
-            exit("No tienes permisos para borrar este post");
-        }
-
-        (new Post())->delete($id);
-
-        header("Location: /posts");
-        exit;
     }
 }
