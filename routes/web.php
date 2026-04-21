@@ -5,6 +5,13 @@ require_once __DIR__ . '/../app/controllers/PostController.php';
 require_once __DIR__ . '/../app/controllers/CommentController.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$base = '/foro-universitario-php/public';
+if (strpos($uri, $base) === 0) {
+    $uri = substr($uri, strlen($base));
+}
+if ($uri === '') {
+    $uri = '/';
+}
 
 switch ($uri) {
     case '/':
@@ -17,6 +24,7 @@ switch ($uri) {
         break;
 
     case '/login':
+        echo "Login";
         $controller = new AuthController();
         $controller->login();
         break;
