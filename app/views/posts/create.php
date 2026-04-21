@@ -1,12 +1,49 @@
-<h2>Crear Publicación</h2>
+<?php require_once __DIR__ . '/../layouts/header.php'; ?>
 
-<form method="POST" action="/posts/create" enctype="multipart/form-data">
-    <input type="text" name="titulo" placeholder="Título" required><br><br>
-    <textarea name="contenido" placeholder="Contenido" required></textarea><br><br>
-    <select name="categoria">
-        <option value="academico">Académico</option>
-        <option value="no_academico">No Académico</option>
-    </select><br><br>
-    <input type="file" name="archivo"><br><br>
-    <button type="submit">Publicar</button>
-</form>
+<div class="card" style="max-width:700px; margin:auto;">
+    <h2>Nueva publicación</h2>
+
+    <form <?= csrf_input(); ?>
+        method="POST"
+        action="/foro-universitario-php/public/posts/create"
+        enctype="multipart/form-data"
+    >
+
+        <label>Título</label>
+        <input
+            type="text"
+            name="titulo"
+            maxlength="255"
+            required
+        >
+
+        <label>Contenido</label>
+        <textarea
+            name="contenido"
+            required
+        ></textarea>
+
+        <label>Categoría</label>
+        <select name="categoria" required>
+            <option value="academico">Académico</option>
+            <option value="no_academico">No Académico</option>
+        </select>
+
+        <label>Archivo (opcional)</label>
+        <input type="file" name="archivo">
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn" type="submit">
+                Publicar
+            </button>
+
+            <a class="btn secondary"
+               href="/foro-universitario-php/public/posts">
+               Cancelar
+            </a>
+        </div>
+
+    </form>
+</div>
+
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

@@ -24,20 +24,17 @@ switch ($uri) {
         break;
 
     case '/login':
-        echo "Login";
         $controller = new AuthController();
         $controller->login();
         break;
 
     case '/logout':
-        session_start();
         session_unset();
         session_destroy();
-        header("Location: /login");
+        header("Location: /foro-universitario-php/public/login");
         exit;
 
-    case '/dashboard':
-        session_start();
+    case '/dashboard': 
         if (!isset($_SESSION['user_id'])) {
             header("Location: /login");
             exit;
