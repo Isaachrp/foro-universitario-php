@@ -5,10 +5,10 @@
         Bienvenido, <?= htmlspecialchars($_SESSION['user_name']) ?> 👋
     </h1>
 
-    <p style="color:#6b7280; margin-bottom:20px;">
+    <!-- <p style="color:#6b7280; margin-bottom:20px;">
         Rol:
         <strong><?= htmlspecialchars($_SESSION['user_role']) ?></strong>
-    </p>
+    </p> -->
 
     <div style="display:flex; gap:12px; flex-wrap:wrap;">
         <a class="btn" href="/foro-universitario-php/public/posts">

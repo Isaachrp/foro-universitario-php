@@ -39,4 +39,40 @@ class Comment
 
         return $stmt->fetchAll();
     }
+
+    // 🔒 Obtener un comentario por ID (para validar permisos)
+    public function getById(int $id): ?array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM comments WHERE id = ?"
+        );
+
+        $stmt->execute([$id]);
+
+        $result = $stmt->fetch();
+
+        return $result ?: null;
+    }
+
+    // 🔒 Eliminar comentario
+    public function delete(int $id): bool
+    {
+        $stmt = $this->db->prepare(
+            "DELETE FROM comments WHERE id = ?"
+        );
+
+        return $stmt->execute([$id]);
+    }
+
+    public function update(int $id, string $contenido): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE comments SET contenido = ? WHERE id = ?"
+        );
+
+        return $stmt->execute([
+            trim($contenido),
+            $id
+        ]);
+    }
 }

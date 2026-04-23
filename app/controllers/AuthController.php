@@ -9,6 +9,7 @@ class AuthController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             csrf_verify();
+
             $nombre   = trim($_POST['nombre'] ?? '');
             $email    = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
@@ -25,6 +26,16 @@ class AuthController
                 exit;
             }
 
+            // 🔒 dominio institucional
+            $allowedDomains = ['upatlacomulco.edu.mx'];
+            $domain = substr(strrchr($email, "@"), 1);
+
+            if (!in_array($domain, $allowedDomains)) {
+                setFlash('error', 'Debes usar un correo institucional.');
+                header('Location: /foro-universitario-php/public/register');
+                exit;
+            }
+
             $user = new User();
 
             if ($user->existsByEmail($email)) {
@@ -33,15 +44,21 @@ class AuthController
                 exit;
             }
 
-            $user->create($nombre, $email, $password);
+            // 🔐 generar token
+            $token = bin2hex(random_bytes(32));
 
-            setFlash('success', 'Usuario registrado correctamente.');
+            $user->createWithVerification($nombre, $email, $password, $token);
+
+            // 📧 enviar correo
+            $this->sendVerificationEmail($email, $token);
+
+            setFlash('success', 'Revisa tu correo para verificar tu cuenta.');
             header('Location: /foro-universitario-php/public/login');
             exit;
         }
 
         require_once __DIR__ . '/../views/auth/register.php';
-    }
+}
 
     public function login()
     {
