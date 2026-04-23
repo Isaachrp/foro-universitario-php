@@ -92,8 +92,19 @@ class PostController
 
     public function index()
     {
+        $limit = 5;
+        $page = max(1, (int)($_GET['page'] ?? 1));
+        $offset = ($page - 1) * $limit;
+
+        $search = trim($_GET['search'] ?? '');
+        $categoria = trim($_GET['categoria'] ?? '');
+
         $post = new Post();
-        $posts = $post->getAll();
+
+        $posts = $post->searchPaginated($search, $categoria, $limit, $offset);
+        $total = $post->countSearch($search, $categoria);
+
+        $totalPages = ceil($total / $limit);
 
         require_once __DIR__ . '/../views/posts/index.php';
     }
@@ -135,6 +146,131 @@ class PostController
 
         setFlash('success', 'Post eliminado.');
         header("Location: /foro-universitario-php/public/posts");
+        exit;
+    }
+
+    public function edit($id)
+    {
+        if (!Auth::check()) {
+            setFlash('warning', 'Debes iniciar sesión.');
+            header("Location: /foro-universitario-php/public/login");
+            exit;
+        }
+
+        $postModel = new Post();
+        $post = $postModel->getById((int)$id);
+
+        if (!$post) {
+            setFlash('error', 'Publicación no encontrada.');
+            header("Location: /foro-universitario-php/public/posts");
+            exit;
+        }
+
+        if (!Auth::isOwner($post['user_id']) && !Auth::isAdmin()) {
+            setFlash('error', 'No tienes permisos.');
+            header("Location: /foro-universitario-php/public/posts");
+            exit;
+        }
+
+        require_once __DIR__ . '/../views/posts/edit.php';
+    }
+
+    public function update()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: /foro-universitario-php/public/posts");
+            exit;
+        }
+
+        csrf_verify();
+
+        if (!Auth::check()) {
+            setFlash('warning', 'Debes iniciar sesión.');
+            header("Location: /foro-universitario-php/public/login");
+            exit;
+        }
+
+        $id        = (int) ($_POST['id'] ?? 0);
+        $titulo    = trim($_POST['titulo'] ?? '');
+        $contenido = trim($_POST['contenido'] ?? '');
+        $categoria = trim($_POST['categoria'] ?? '');
+
+        if ($id <= 0 || $titulo === '' || $contenido === '' || $categoria === '') {
+            setFlash('error', 'Datos inválidos.');
+            header("Location: /foro-universitario-php/public/posts");
+            exit;
+        }
+
+        $postModel = new Post();
+        $post = $postModel->getById($id);
+
+        if (!$post) {
+            setFlash('error', 'Publicación no existe.');
+            header("Location: /foro-universitario-php/public/posts");
+            exit;
+        }
+
+        if (!Auth::isOwner($post['user_id']) && !Auth::isAdmin()) {
+            setFlash('error', 'No tienes permisos.');
+            header("Location: /foro-universitario-php/public/posts");
+            exit;
+        }
+
+        $archivo = $post['archivo'];
+
+        // 📎 Nuevo archivo (opcional)
+        if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === 0) {
+
+            $fileTmp  = $_FILES['archivo']['tmp_name'];
+            $fileSize = $_FILES['archivo']['size'];
+
+            if ($fileSize > 5 * 1024 * 1024) {
+                setFlash('error', 'Archivo demasiado grande.');
+                header("Location: /foro-universitario-php/public/posts/edit?id=" . $id);
+                exit;
+            }
+
+            $extension = strtolower(pathinfo($_FILES['archivo']['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'pdf'];
+
+            if (!in_array($extension, $allowed)) {
+                setFlash('error', 'Tipo de archivo no permitido.');
+                header("Location: /foro-universitario-php/public/posts/edit?id=" . $id);
+                exit;
+            }
+
+            $extension = $extension === 'jpeg' ? 'jpg' : $extension;
+            $nombreSeguro = bin2hex(random_bytes(16)) . '.' . $extension;
+
+            $uploadDir = __DIR__ . '/../../public/uploads/';
+
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $destino = $uploadDir . $nombreSeguro;
+
+            if (!move_uploaded_file($fileTmp, $destino)) {
+                setFlash('error', 'Error al subir archivo.');
+                header("Location: /foro-universitario-php/public/posts/edit?id=" . $id);
+                exit;
+            }
+
+            // 🧹 eliminar archivo anterior
+            if (!empty($post['archivo'])) {
+                $old = $uploadDir . $post['archivo'];
+                if (file_exists($old)) {
+                    unlink($old);
+                }
+            }
+
+            $archivo = $nombreSeguro;
+        }
+
+        $postModel->update($id, $titulo, $contenido, $categoria, $archivo);
+
+        setFlash('success', 'Publicación actualizada.');
+        header("Location: /foro-universitario-php/public/posts/show?id=" . $id);
         exit;
     }
 }

@@ -52,4 +52,47 @@ class User
 
         return $stmt->fetch();
     }
+
+    public function getPosts(int $user_id): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM posts 
+            WHERE user_id = ? 
+            ORDER BY created_at DESC"
+        );
+
+        $stmt->execute([$user_id]);
+
+        return $stmt->fetchAll();
+    }
+
+    public function getComments(int $user_id): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT comments.*, posts.titulo 
+            FROM comments
+            JOIN posts ON comments.post_id = posts.id
+            WHERE comments.user_id = ?
+            ORDER BY comments.created_at DESC"
+        );
+
+        $stmt->execute([$user_id]);
+
+        return $stmt->fetchAll();
+    }
+
+    public function createWithVerification(string $nombre, string $email, string $password, string $token): bool
+    {
+        $stmt = $this->db->prepare(
+            "INSERT INTO users (nombre, email, password, verify_token, verified) 
+            VALUES (?, ?, ?, ?, 0)"
+        );
+
+        return $stmt->execute([
+            trim($nombre),
+            strtolower(trim($email)),
+            password_hash($password, PASSWORD_DEFAULT),
+            $token
+        ]);
+}
 }

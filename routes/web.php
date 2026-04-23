@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/PostController.php';
 require_once __DIR__ . '/../app/controllers/CommentController.php';
+require_once __DIR__ . '/../app/controllers/UserController.php';
 require_once __DIR__ . '/../app/helpers/Auth.php';
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -83,6 +84,37 @@ switch ($uri) {
     
     case '/posts/delete':
         (new PostController())->delete($_POST['id'] ?? 0);
+        break;
+    
+    case '/comments/delete':
+        $controller = new CommentController();
+        $controller->delete();
+        break;
+    
+    case '/posts/edit':
+        $controller = new PostController();
+        $controller->edit($_GET['id'] ?? 0);
+        break;
+
+    case '/posts/update':
+        $controller = new PostController();
+        $controller->update();
+        break;
+
+
+    case '/comments/edit':
+        $controller = new CommentController();
+        $controller->edit($_GET['id'] ?? 0);
+        break;
+
+    case '/comments/update':
+        $controller = new CommentController();
+        $controller->update();
+        break;
+
+    case '/users/show':
+        $controller = new UserController();
+        $controller->show($_GET['id'] ?? 0);
         break;
 
     default:
