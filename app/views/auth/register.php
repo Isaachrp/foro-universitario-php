@@ -3,7 +3,9 @@
 <div class="card" style="max-width:550px; margin:auto;">
     <h2>Crear cuenta</h2>
 
-    <form <?= csrf_input(); ?> method="POST" action="/foro-universitario-php/public/register">
+    <form method="POST" action="/foro-universitario-php/public/register">
+
+        <?= csrf_input(); ?>
 
         <label>Nombre</label>
         <input
@@ -43,4 +45,4 @@
     </p>
 </div>
 
-<?php require_once __DIR__ . '/../layouts/footer.php'; ?>   
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

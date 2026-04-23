@@ -88,7 +88,7 @@ textarea {
     <div class="brand">🎓 Foro Universitario</div>
 
     <div>
-        <?php if (isset($_SESSION['user_id'])): ?>
+        <?php if (Auth::check()): ?>
             <a href="/foro-universitario-php/public/dashboard">Dashboard</a>
             <a href="/foro-universitario-php/public/posts">Publicaciones</a>
             <a href="/foro-universitario-php/public/logout">Salir</a>

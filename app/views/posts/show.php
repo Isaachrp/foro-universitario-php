@@ -15,12 +15,26 @@
         <p>
             Archivo:
             <a
-                href="/foro-universitario-php/uploads/<?= urlencode($postData['archivo']) ?>"
+                href="/foro-universitario-php/public/uploads/<?= urlencode($postData['archivo']) ?>"
                 target="_blank"
             >
                 <?= htmlspecialchars($postData['archivo']) ?>
             </a>
         </p>
+    <?php endif; ?>
+    <?php if (Auth::isOwner($postData['user_id']) || Auth::isAdmin()): ?>
+
+        <form method="POST" action="/foro-universitario-php/public/posts/delete" style="margin-top:15px;">
+            
+            <?= csrf_input(); ?>
+            
+            <input type="hidden" name="id" value="<?= $postData['id'] ?>">
+            
+            <button class="btn" onclick="return confirm('¿Eliminar esta publicación?')">
+                Eliminar
+            </button>
+        </form>
+
     <?php endif; ?>
 </div>
 
@@ -51,7 +65,10 @@
 <div class="card">
     <h3>Agregar comentario</h3>
 
-    <form <?= csrf_input(); ?> method="POST" action="/foro-universitario-php/public/comments/create">
+    <form method="POST" action="/foro-universitario-php/public/comments/create">
+
+        <?= csrf_input(); ?>
+
         <input type="hidden" name="post_id" value="<?= $postData['id'] ?>">
 
         <textarea name="contenido" required></textarea>

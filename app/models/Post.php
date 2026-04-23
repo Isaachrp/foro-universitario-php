@@ -58,4 +58,10 @@ class Post
 
         return $stmt->fetch();
     }
+
+    public function delete($id)
+    {
+        $stmt = $this->db->prepare("DELETE FROM posts WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
 }
