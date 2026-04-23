@@ -3,11 +3,13 @@
 <div class="card" style="max-width:700px; margin:auto;">
     <h2>Nueva publicación</h2>
 
-    <form <?= csrf_input(); ?>
+    <form
         method="POST"
         action="/foro-universitario-php/public/posts/create"
         enctype="multipart/form-data"
     >
+
+        <?= csrf_input(); ?>
 
         <label>Título</label>
         <input

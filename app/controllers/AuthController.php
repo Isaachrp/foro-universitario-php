@@ -48,8 +48,18 @@ class AuthController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             csrf_verify();
+
             $email    = trim($_POST['email'] ?? '');
             $password = $_POST['password'] ?? '';
+
+            $key = 'login_' . ($_SERVER['REMOTE_ADDR'] ?? 'guest');
+
+            // 🔒 Verificar límite
+            if (!rateLimitCheck($key)) {
+                setFlash('error', 'Demasiados intentos. Intenta más tarde.');
+                header('Location: /foro-universitario-php/public/login');
+                exit;
+            }
 
             if (!$email || !$password) {
                 setFlash('error', 'Todos los campos son obligatorios.');
@@ -61,6 +71,11 @@ class AuthController
 
             if ($user && password_verify($password, $user['password'])) {
 
+                // 🔒 limpiar intentos al éxito
+                rateLimitClear($key);
+
+                session_regenerate_id(true);
+
                 $_SESSION['user_id']   = $user['id'];
                 $_SESSION['user_name'] = $user['nombre'];
                 $_SESSION['user_role'] = $user['rol'];
@@ -69,6 +84,9 @@ class AuthController
                 header('Location: /foro-universitario-php/public/dashboard');
                 exit;
             }
+
+            // 🔒 registrar intento fallido
+            rateLimitHit($key);
 
             setFlash('error', 'Correo o contraseña incorrectos.');
             header('Location: /foro-universitario-php/public/login');

@@ -1,23 +1,21 @@
 <?php
 
 require_once __DIR__ . '/../models/Comment.php';
+require_once __DIR__ . '/../helpers/Auth.php';
 
 class CommentController
 {
     public function create()
     {
-        if (!isset($_SESSION['user_id'])) {
-            setFlash('warning', 'Debes iniciar sesión para comentar.');
-            header("Location: /foro-universitario-php/public/login");
-            exit;
-        }
+        // 🔒 Requiere autenticación
+        Auth::requireAuth();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $contenido = trim($_POST['contenido'] ?? '');
             $post_id   = (int) ($_POST['post_id'] ?? 0);
-            $user_id   = (int) $_SESSION['user_id'];
 
+            // 🔒 Validación
             if ($contenido === '' || $post_id <= 0) {
                 setFlash('error', 'Datos inválidos.');
                 header("Location: /foro-universitario-php/public/posts/show?id=" . $post_id);
@@ -29,7 +27,7 @@ class CommentController
             $comment->create(
                 $contenido,
                 $post_id,
-                $user_id
+                Auth::id() // 🔥 ya no usamos $_SESSION
             );
 
             setFlash('success', 'Comentario agregado correctamente.');
@@ -37,6 +35,7 @@ class CommentController
             exit;
         }
 
+        // fallback
         header("Location: /foro-universitario-php/public/posts");
         exit;
     }
