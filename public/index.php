@@ -1,5 +1,5 @@
 <?php
-
+require_once __DIR__ . '/../vendor/autoload.php';
 // 🔒 Configuración segura de sesión (ANTES de session_start)
 ini_set('session.use_strict_mode', 1);
 
@@ -44,5 +44,6 @@ require_once __DIR__ . '/../app/helpers/flash.php';
 require_once __DIR__ . '/../app/helpers/csrf.php';
 require_once __DIR__ . '/../app/helpers/rate_limit.php';
 require_once __DIR__ . '/../app/helpers/Auth.php';
+require_once __DIR__ . '/../app/helpers/mail.php';
 // Router
 require_once __DIR__ . '/../routes/web.php';

@@ -1,0 +1,17 @@
+{
+    "name": "isaac/foro-universitario-php",
+    "autoload": {
+        "psr-4": {
+            "Isaac\\ForoUniversitarioPhp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "isaachrp",
+            "email": "isaac040124@gmail.com"
+        }
+    ],
+    "require": {
+        "phpmailer/phpmailer": "^7.0"
+    }
+}

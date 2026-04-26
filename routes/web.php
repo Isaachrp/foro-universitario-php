@@ -117,6 +117,12 @@ switch ($uri) {
         $controller->show($_GET['id'] ?? 0);
         break;
 
+
+    case '/verify-email':
+        $controller = new AuthController();
+        $controller->verifyEmail();
+        break;
+
     default:
         http_response_code(404);
         echo "Página no encontrada";
