@@ -84,8 +84,8 @@ class User
     public function createWithVerification(string $nombre, string $email, string $password, string $token): bool
     {
         $stmt = $this->db->prepare(
-            "INSERT INTO users (nombre, email, password, verify_token, verified) 
-            VALUES (?, ?, ?, ?, 0)"
+            "INSERT INTO users (nombre, email, password, verification_token) 
+            VALUES (?, ?, ?, ?)"
         );
 
         return $stmt->execute([
@@ -94,5 +94,27 @@ class User
             password_hash($password, PASSWORD_DEFAULT),
             $token
         ]);
-}
+    }
+
+    public function getByVerificationToken(string $token)
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM users WHERE verification_token = ? LIMIT 1"
+        );
+
+        $stmt->execute([$token]);
+
+        return $stmt->fetch();
+    }
+
+    public function markEmailAsVerified(int $id)
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE users 
+            SET email_verified_at = NOW(), verification_token = NULL 
+            WHERE id = ?"
+        );
+
+        return $stmt->execute([$id]);
+    }
 }

@@ -11,7 +11,7 @@ class AuthController
             csrf_verify();
 
             $nombre   = trim($_POST['nombre'] ?? '');
-            $email    = trim($_POST['email'] ?? '');
+            $email    = strtolower(trim($_POST['email'] ?? ''));
             $password = $_POST['password'] ?? '';
 
             if (!$nombre || !$email || !$password) {
@@ -26,9 +26,11 @@ class AuthController
                 exit;
             }
 
-            // 🔒 dominio institucional
+            // 🔒 dominio institucional seguro
+            $parts = explode('@', $email);
+            $domain = $parts[1] ?? '';
+
             $allowedDomains = ['upatlacomulco.edu.mx'];
-            $domain = substr(strrchr($email, "@"), 1);
 
             if (!in_array($domain, $allowedDomains)) {
                 setFlash('error', 'Debes usar un correo institucional.');
@@ -44,21 +46,35 @@ class AuthController
                 exit;
             }
 
-            // 🔐 generar token
             $token = bin2hex(random_bytes(32));
 
-            $user->createWithVerification($nombre, $email, $password, $token);
+            // 🔒 validar creación
+            $created = $user->createWithVerification($nombre, $email, $password, $token);
 
-            // 📧 enviar correo
-            $this->sendVerificationEmail($email, $token);
+            if (!$created) {
+                setFlash('error', 'Error al registrar usuario.');
+                header('Location: /foro-universitario-php/public/register');
+                exit;
+            }
+
+            // 📧 envío seguro
+            try {
+                if (!$this->sendVerificationEmail($email, $token)) {
+                    throw new Exception('Error al enviar correo');
+                }
+            } catch (Exception $e) {
+                setFlash('error', 'No se pudo enviar el correo.');
+                header('Location: /foro-universitario-php/public/register');
+                exit;
+            }
 
             setFlash('success', 'Revisa tu correo para verificar tu cuenta.');
-            header('Location: /foro-universitario-php/public/login');
-            exit;
+            require_once __DIR__ . '/../views/auth/verify_notice.php';
+            exit;   
         }
 
         require_once __DIR__ . '/../views/auth/register.php';
-}
+    }
 
     public function login()
     {
@@ -66,12 +82,11 @@ class AuthController
 
             csrf_verify();
 
-            $email    = trim($_POST['email'] ?? '');
+            $email    = strtolower(trim($_POST['email'] ?? ''));
             $password = $_POST['password'] ?? '';
 
             $key = 'login_' . ($_SERVER['REMOTE_ADDR'] ?? 'guest');
 
-            // 🔒 Verificar límite
             if (!rateLimitCheck($key)) {
                 setFlash('error', 'Demasiados intentos. Intenta más tarde.');
                 header('Location: /foro-universitario-php/public/login');
@@ -88,7 +103,13 @@ class AuthController
 
             if ($user && password_verify($password, $user['password'])) {
 
-                // 🔒 limpiar intentos al éxito
+                // 🔴 bloqueo si no verificado
+                if (empty($user['email_verified_at'])) {
+                    setFlash('warning', 'Debes verificar tu correo antes de iniciar sesión.');
+                    header('Location: /foro-universitario-php/public/login');
+                    exit;
+                }
+
                 rateLimitClear($key);
 
                 session_regenerate_id(true);
@@ -102,7 +123,6 @@ class AuthController
                 exit;
             }
 
-            // 🔒 registrar intento fallido
             rateLimitHit($key);
 
             setFlash('error', 'Correo o contraseña incorrectos.');
@@ -111,5 +131,53 @@ class AuthController
         }
 
         require_once __DIR__ . '/../views/auth/login.php';
+    }
+
+    public function verifyEmail()
+    {
+        $token = $_GET['token'] ?? '';
+
+        if (!$token) {
+            setFlash('error', 'Token inválido.');
+            header('Location: /foro-universitario-php/public/login');
+            exit;
+        }
+
+        $userModel = new User();
+        $user = $userModel->getByVerificationToken($token);
+
+        if (!$user) {
+            require_once __DIR__ . '/../views/auth/verify_error.php';
+            exit;
+        }
+
+        if (!empty($user['email_verified_at'])) {
+            setFlash('warning', 'El correo ya fue verificado.');
+            header('Location: /foro-universitario-php/public/login');
+            exit;
+        }
+
+        $userModel->markEmailAsVerified($user['id']);
+
+        setFlash('success', 'Correo verificado correctamente.');
+        require_once __DIR__ . '/../views/auth/verify_success.php';
+        exit;
+    }
+
+    private function sendVerificationEmail($email, $token)
+    {
+        $link = "http://localhost/foro-universitario-php/public/verify-email?token=$token";
+
+        $subject = "Verifica tu cuenta";
+
+        $body = "
+            <h2>Verificación de cuenta</h2>
+            <p>Haz clic en el siguiente enlace para activar tu cuenta:</p>
+            <a href='$link'>$link</a>
+            <br><br>
+            <small>Si no solicitaste esto, ignora este mensaje.</small>
+        ";
+
+        return sendMail($email, $subject, $body);
     }
 }
