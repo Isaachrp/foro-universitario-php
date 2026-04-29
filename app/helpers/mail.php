@@ -9,14 +9,15 @@ function sendMail($to, $subject, $body)
 
     try {
         $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
-        $mail->SMTPAuth   = true;
-        $mail->Username   = '';
-        $mail->Password   = '';
-        $mail->SMTPSecure = 'tls';
-        $mail->Port       = 587;
+        
+        $mail->Host       = env('MAIL_HOST');
+        $mail->Port       = env('MAIL_PORT');
+        $mail->Username   = env('MAIL_USER');
+        $mail->Password   = env('MAIL_PASS');
+        $mail->SMTPSecure = env('MAIL_ENCRYPTION');
 
-        $mail->setFrom('', 'Foro Universitario');
+        $mail->setFrom(env('MAIL_FROM'), env('MAIL_FROM_NAME'));
+        $mail->SMTPAuth   = true;
         $mail->addAddress($to);
 
         $mail->isHTML(true);
