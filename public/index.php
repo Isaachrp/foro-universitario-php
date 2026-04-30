@@ -45,5 +45,6 @@ require_once __DIR__ . '/../app/helpers/csrf.php';
 require_once __DIR__ . '/../app/helpers/rate_limit.php';
 require_once __DIR__ . '/../app/helpers/Auth.php';
 require_once __DIR__ . '/../app/helpers/mail.php';
+require_once __DIR__ . '/../app/helpers/env.php';
 // Router
 require_once __DIR__ . '/../routes/web.php';
