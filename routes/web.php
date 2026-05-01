@@ -5,6 +5,8 @@ require_once __DIR__ . '/../app/controllers/PostController.php';
 require_once __DIR__ . '/../app/controllers/CommentController.php';
 require_once __DIR__ . '/../app/controllers/UserController.php';
 require_once __DIR__ . '/../app/helpers/Auth.php';
+require_once __DIR__ . '/../app/controllers/AdminController.php';
+
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $base = '/foro-universitario-php/public';
@@ -61,8 +63,7 @@ switch ($uri) {
         exit;
 
     case '/dashboard':
-        Auth::requireAuth();
-        require_once __DIR__ . '/../app/views/dashboard.php';
+        (new AdminController())->dashboard();
         break;
 
     case '/posts':
@@ -121,6 +122,14 @@ switch ($uri) {
     case '/verify-email':
         $controller = new AuthController();
         $controller->verifyEmail();
+        break;
+
+    case '/admin/ban':
+        (new AdminController())->ban();
+        break;
+
+    case '/admin/unban':
+        (new AdminController())->unban();
         break;
 
     default:

@@ -25,4 +25,36 @@
     </div>
 </div>
 
+<?php if (Auth::isAdmin()): ?>
+
+<div class="card">
+    <h3>Administrar usuarios</h3>
+
+    <?php foreach ($users as $u): ?>
+
+        <div style="margin-bottom:10px;">
+            <strong><?= htmlspecialchars($u['nombre']) ?></strong>
+            (<?= htmlspecialchars($u['email']) ?>)
+
+            <?php if (!$u['is_banned']): ?>
+                <form method="POST" action="/foro-universitario-php/public/admin/ban">
+                    <?= csrf_input(); ?>
+                    <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                    <input type="text" name="reason" placeholder="Motivo (opcional)">
+                    <button class="btn">Banear</button>
+                </form>
+            <?php else: ?>
+                <form method="POST" action="/foro-universitario-php/public/admin/unban">
+                    <?= csrf_input(); ?>
+                    <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                    <button class="btn secondary">Desbanear</button>
+                </form>
+            <?php endif; ?>
+        </div>
+
+    <?php endforeach; ?>
+</div>
+
+<?php endif; ?>
+
 <?php require_once __DIR__ . '/layouts/footer.php'; ?>

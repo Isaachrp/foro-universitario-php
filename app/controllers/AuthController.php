@@ -103,6 +103,12 @@ class AuthController
 
             if ($user && password_verify($password, $user['password'])) {
 
+                if (!empty($user['is_banned'])) {
+                    setFlash('error', 'Tu cuenta ha sido bloqueada.');
+                    header('Location: /foro-universitario-php/public/login');
+                    exit;
+                }
+
                 // 🔴 bloqueo si no verificado
                 if (empty($user['email_verified_at'])) {
                     setFlash('warning', 'Debes verificar tu correo antes de iniciar sesión.');
