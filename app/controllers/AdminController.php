@@ -52,4 +52,46 @@ class AdminController
         header("Location: /foro-universitario-php/public/dashboard");
         exit;
     }
+
+    public function store()
+    {
+        Auth::requireAuth();
+        if (!Auth::isAdmin()) exit('Acceso denegado');
+
+        (new User())->create(
+            $_POST['nombre'],
+            $_POST['email'],
+            $_POST['password']
+        );
+
+        header("Location: /foro-universitario-php/public/dashboard");
+        exit;
+    }
+
+    public function update()
+    {
+        Auth::requireAuth();
+        if (!Auth::isAdmin()) exit('Acceso denegado');
+
+        (new User())->update(
+            (int)$_POST['id'],
+            $_POST['nombre'],
+            $_POST['email'],
+            $_POST['rol']
+        );
+
+        header("Location: /foro-universitario-php/public/dashboard");
+        exit;
+    }
+
+    public function delete()
+    {
+        Auth::requireAuth();
+        if (!Auth::isAdmin()) exit('Acceso denegado');
+
+        (new User())->delete((int)$_POST['id']);
+
+        header("Location: /foro-universitario-php/public/dashboard");
+        exit;
+    }
 }

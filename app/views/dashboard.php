@@ -27,34 +27,89 @@
 
 <?php if (Auth::isAdmin()): ?>
 
-<div class="card">
-    <h3>Administrar usuarios</h3>
+    <div class="card">
+        <h3>Administrar usuarios</h3>
 
-    <?php foreach ($users as $u): ?>
+        <table id="usersTable" class="display">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
 
-        <div style="margin-bottom:10px;">
-            <strong><?= htmlspecialchars($u['nombre']) ?></strong>
-            (<?= htmlspecialchars($u['email']) ?>)
+            <tbody>
+                <?php foreach ($users as $u): ?>
+                    <tr>
+                        <td><?= $u['id'] ?></td>
+                        <td><?= htmlspecialchars($u['nombre']) ?></td>
+                        <td><?= htmlspecialchars($u['email']) ?></td>
+                        <td><?= $u['rol'] ?></td>
+                        <td>
+                            <?= $u['is_banned'] ? 'Baneado' : 'Activo' ?>
+                        </td>
+                        <td style="display:flex; gap:6px; flex-wrap:wrap;">
 
-            <?php if (!$u['is_banned']): ?>
-                <form method="POST" action="/foro-universitario-php/public/admin/ban">
-                    <?= csrf_input(); ?>
-                    <input type="hidden" name="id" value="<?= $u['id'] ?>">
-                    <input type="text" name="reason" placeholder="Motivo (opcional)">
-                    <button class="btn">Banear</button>
-                </form>
-            <?php else: ?>
-                <form method="POST" action="/foro-universitario-php/public/admin/unban">
-                    <?= csrf_input(); ?>
-                    <input type="hidden" name="id" value="<?= $u['id'] ?>">
-                    <button class="btn secondary">Desbanear</button>
-                </form>
-            <?php endif; ?>
-        </div>
+                            <!-- BAN / UNBAN -->
+                            <?php if (!$u['is_banned']): ?>
+                                <form method="POST" action="/foro-universitario-php/public/admin/ban">
+                                    <?= csrf_input(); ?>
+                                    <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                                    <button class="btn">Ban</button>
+                                </form>
+                            <?php else: ?>
+                                <form method="POST" action="/foro-universitario-php/public/admin/unban">
+                                    <?= csrf_input(); ?>
+                                    <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                                    <button class="btn secondary">Unban</button>
+                                </form>
+                            <?php endif; ?>
 
-    <?php endforeach; ?>
-</div>
+                            <!-- DELETE -->
+                            <form method="POST" action="/foro-universitario-php/public/admin/users/delete"
+                                onsubmit="return confirm('¿Eliminar usuario?')">
+                                <?= csrf_input(); ?>
+                                <input type="hidden" name="id" value="<?= $u['id'] ?>">
+                                <button class="btn danger">Delete</button>
+                            </form>
+
+                            <!-- EDIT (simple inline form) -->
+                            <form method="POST" action="/foro-universitario-php/public/admin/users/update">
+                                <?= csrf_input(); ?>
+                                <input type="hidden" name="id" value="<?= $u['id'] ?>">
+
+                                <input type="text" name="nombre" value="<?= htmlspecialchars($u['nombre']) ?>" required>
+                                <input type="email" name="email" value="<?= htmlspecialchars($u['email']) ?>" required>
+
+                                <select name="rol">
+                                    <option value="user" <?= $u['rol'] === 'user' ? 'selected' : '' ?>>user</option>
+                                    <option value="admin" <?= $u['rol'] === 'admin' ? 'selected' : '' ?>>admin</option>
+                                </select>
+
+                                <button class="btn">Update</button>
+                            </form>
+
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 
 <?php endif; ?>
-
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    $('#usersTable').DataTable({
+        pageLength: 10,
+        order: [[0, "desc"]],
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json"
+        }
+    });
+});
+</script>
 <?php require_once __DIR__ . '/layouts/footer.php'; ?>

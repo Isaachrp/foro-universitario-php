@@ -177,4 +177,29 @@ class User
 
         return !empty($result['is_banned']);
     }
+
+    public function update(int $id, string $nombre, string $email, string $rol): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE users 
+            SET nombre = ?, email = ?, rol = ? 
+            WHERE id = ?"
+        );
+
+        return $stmt->execute([
+            trim($nombre),
+            strtolower(trim($email)),
+            $rol,
+            $id
+        ]);
+    }
+
+    public function delete(int $id): bool
+    {
+        $stmt = $this->db->prepare(
+            "DELETE FROM users WHERE id = ?"
+        );
+
+        return $stmt->execute([$id]);
+    }
 }

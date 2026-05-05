@@ -132,6 +132,18 @@ switch ($uri) {
         (new AdminController())->unban();
         break;
 
+    case '/admin/users/store':
+        (new AdminController())->store();
+        break;
+
+    case '/admin/users/update':
+        (new AdminController())->update();
+        break;
+
+    case '/admin/users/delete':
+        (new AdminController())->delete();
+        break;
+
     default:
         http_response_code(404);
         echo "Página no encontrada";
